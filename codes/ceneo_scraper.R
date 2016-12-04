@@ -10,6 +10,10 @@ library(stringi)
 # http://www.ceneo.pl/Karmienie_dziecka;0191;0020-30-0-0-1.htm
 # http://www.ceneo.pl/Podroz_i_spacer_z_dzieckiem;0191;0020-30-0-0-0.htm
 
+
+# functions ---------------------------------------------------------------
+
+
 ## create links for search results
 ceneo_links <- function(cat='', page=1) {
   if (cat == 'cik') {
@@ -49,8 +53,13 @@ get_main_page_results <- function(url) {
     stri_replace_all_fixed(replacement = '.', pattern = ',') %>% as.numeric()
   prod_opin <- main_page %>% html_node('a.product-reviews-link') %>%
     html_text() %>% stri_extract_all_regex('\\d+', simplify = T)
-  prod_no_votes <-   prod_opin[, 1] %>% as.numeric()
-  prod_no_opin <-   prod_opin[, 2] %>% as.numeric()
+  if (ncol(prod_opin) == 2) {
+    prod_no_votes <-   prod_opin[, 1] %>% as.numeric()
+    prod_no_opin <-   prod_opin[, 2] %>% as.numeric()
+  } 
+  else {
+    prod_no_votes <- prod_no_opin <- prod_opin %>% as.numeric()
+  }
   prod_price_min <- main_page %>% html_node('span.price') %>%
     html_text() %>% stri_replace_all_fixed(replacement = '.', pattern = ',') %>%
     as.numeric()
@@ -58,7 +67,9 @@ get_main_page_results <- function(url) {
     html_text() %>% stri_extract_all_regex('\\d+', simplify = T) %>%
     as.numeric()
   prod_category <-
-    main_page %>% html_node('p.cat-prod-row-category a.dotted-link') %>% html_text()
+    main_page %>% html_node('p.cat-prod-row-category a.dotted-link') %>% 
+    html_text()
+  
   prod_link <-
     main_page %>% html_node('strong.cat-prod-row-name a') %>%
     html_attr('href') %>%
@@ -140,36 +151,47 @@ get_page_details <- function(url) {
   return(prod_info)
 }
 
-## scrape all products 
 
+# scraping ----------------------------------------------------------------
+
+## spacer
 ceneo_spacer <- list()
+n_pages <- ceneo_links(page = 1) %>% 
+  read_html() %>% html_nodes('div.pagination ul') %>%
+  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm=T)
 
-for (i in 79:961) {
-  cat('strona: ',i, 'z 961\n')
+for (i in 1:n_pages) {
+  cat('strona: ', i, 'z 961\n')
   ceneo_spacer[[i]] <- get_main_page_results(ceneo_links(page = i))
 }
 
 ceneo_spacer_df <- bind_rows(ceneo_spacer)
-save(ceneo_spacer_df,file='datasets/ceneo-podroz-i-spacer.rda')
+save(ceneo_spacer_df,file = 'datasets/ceneo-podroz-i-spacer.rda')
 
-# karmienie ---------------------------------------------------------------
+## karmienie 
 
 ceneo_karmienie <- list()
+n_pages <- ceneo_links(page = i, cat = 'karm') %>% 
+  read_html() %>% html_nodes('div.pagination ul') %>%
+  html_nodes('li a') %>% html_
 
-for (i in 1:476) {
+for (i in 1:n_pages) {
   cat('strona: ',i, 'z 476\n')
   ceneo_karmienie[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                             cat = 'karm'))
 }
 
 ceneo_karmienie_df <- bind_rows(ceneo_karmienie)
-save(ceneo_karmienie_df,file='datasets/ceneo-karmienie.rda')
+save(ceneo_karmienie_df, file = 'datasets/ceneo-karmienie.rda')
 
-# piers -------------------------------------------------------------------
+## piers 
 
 ceneo_piers <- list()
+n_pages <- ceneo_links(page = i, cat = 'cik') %>% 
+  read_html() %>% html_nodes('div.pagination ul') %>%
+  html_nodes('li a') %>% html_
 
-for (i in 1:83) {
+for (i in 22:n_pages) {
   cat('strona: ',i, 'z 83\n')
   ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                         cat = 'cik'))
