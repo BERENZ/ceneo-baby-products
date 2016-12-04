@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Produkty dla małych dzieci
+
+Wczytuję potrzebne pakiety
+
+```{r}
+library(tidyverse)
+```
+
+
+## Analiza podróży i spacerów
+
+```{r}
+load('../datasets/ceneo-podroz-i-spacer.rda')
+dim(ceneo_spacer_df)
+head(ceneo_spacer_df %>%  select(-prod_info))
+```
+
+Kategorie produktów
+
+```{r}
+ceneo_spacer_df %>% 
+  count(prod_category, sort = T)
+```
+
+Zobaczmy jakie jest zróżnicowanie cen w fotelikach
+
+```{r}
+m <- ceneo_spacer_df %>%
+  dplyr::filter(prod_category == 'Foteliki samochodowe') %>%
+  do(sel = .$prod_info)
+
+prices <- lapply(m$sel[[1]],'[[','prod_prices') %>%
+  stri_split(fixed=', ') %>%
+  unlist() %>%
+  as.numeric()
+
+summary(prices)
+
+boxplot(prices)
+```
+
