@@ -78,7 +78,21 @@ get_main_page_results <- function(url) {
     html_attr('href') %>%
     stri_paste('http://www.ceneo.pl', .)
   
-  prod_info <- lapply(prod_link, get_page_details)
+  if (any(is.na(prod_link))) {
+    
+    Sys.sleep(5)
+    prod_link <-
+      url %>% read_html() %>% html_nodes('div.cat-prod-row-body') %>% 
+      html_node('strong.cat-prod-row-name a') %>%
+      html_attr('href') %>%
+      stri_paste('http://www.ceneo.pl', .)
+    
+    prod_info <- lapply(prod_link, get_page_details)
+    
+  } else {
+    prod_info <- lapply(prod_link, get_page_details)
+  }
+
   
   df <- data_frame(
     prod_title = prod_title,
