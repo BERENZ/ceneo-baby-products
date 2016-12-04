@@ -1,20 +1,10 @@
-### scraper for ceneo
-
-library(rvest)
-library(dplyr)
-library(rdom)
-library(stringi)
+## create links for search results
 
 ## linki
 # http://www.ceneo.pl/Ciaza_i_karmienie_piersia;0191;0020-30-0-0-1.htm
 # http://www.ceneo.pl/Karmienie_dziecka;0191;0020-30-0-0-1.htm
 # http://www.ceneo.pl/Podroz_i_spacer_z_dzieckiem;0191;0020-30-0-0-0.htm
 
-
-# functions ---------------------------------------------------------------
-
-
-## create links for search results
 ceneo_links <- function(cat = '', page = 1) {
   if (cat == 'cik') {
     base_url <-
@@ -91,7 +81,7 @@ get_main_page_results <- function(url) {
   } else {
     prod_info <- lapply(prod_link, get_page_details)
   }
-
+  
   
   df <- data_frame(
     prod_title = prod_title,
@@ -180,53 +170,3 @@ get_page_details <- function(url) {
   
   return(prod_info)
 }
-
-
-# scraping ----------------------------------------------------------------
-
-## spacer
-ceneo_spacer <- list()
-n_pages <- ceneo_links(page = 1) %>%
-  read_html() %>% html_nodes('div.pagination ul') %>%
-  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
-
-for (i in 1:n_pages) {
-  cat('strona: ', i, 'z 961\n')
-  ceneo_spacer[[i]] <- get_main_page_results(ceneo_links(page = i))
-}
-
-ceneo_spacer_df <- bind_rows(ceneo_spacer)
-save(ceneo_spacer_df, file = 'datasets/ceneo-podroz-i-spacer.rda')
-
-## karmienie
-
-ceneo_karmienie <- list()
-n_pages <- ceneo_links(page = i, cat = 'karm') %>%
-  read_html() %>% html_nodes('div.pagination ul') %>%
-  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
-
-for (i in 1:n_pages) {
-  cat('strona: ', i, 'z 476\n')
-  ceneo_karmienie[[i]] <-
-    get_main_page_results(ceneo_links(page = i,
-                                      cat = 'karm'))
-}
-
-ceneo_karmienie_df <- bind_rows(ceneo_karmienie)
-save(ceneo_karmienie_df, file = 'datasets/ceneo-karmienie.rda')
-
-## piers
-
-ceneo_piers <- list()
-n_pages <- ceneo_links(page = i, cat = 'cik') %>%
-  read_html() %>% html_nodes('div.pagination ul') %>%
-  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
-
-for (i in 41:n_pages) {
-  cat('strona: ', i, 'z 83\n')
-  ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
-                                                        cat = 'cik'))
-}
-
-ceneo_piers_df <- bind_rows(ceneo_piers)
-save(ceneo_piers, file = 'datasets/ceneo-piers.rda')
