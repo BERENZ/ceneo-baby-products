@@ -111,10 +111,9 @@ get_main_page_results <- function(url) {
 ## detailed information
 
 get_page_details <- function(url) {
-  
   test_session_session <- html_session(url)
   ceneo_true <- stri_detect(test_session_session$url,
-                            fixed = 'ceneo')
+                            fixed = 'www.ceneo.pl')
   if (!ceneo_true) {
     prod_info <- list(
       prod_prices = NULL,
@@ -204,7 +203,7 @@ save(ceneo_spacer_df, file = 'datasets/ceneo-podroz-i-spacer.rda')
 ceneo_karmienie <- list()
 n_pages <- ceneo_links(page = i, cat = 'karm') %>%
   read_html() %>% html_nodes('div.pagination ul') %>%
-  html_nodes('li a') %>% html_
+  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
 
 for (i in 1:n_pages) {
   cat('strona: ', i, 'z 476\n')
@@ -221,10 +220,13 @@ save(ceneo_karmienie_df, file = 'datasets/ceneo-karmienie.rda')
 ceneo_piers <- list()
 n_pages <- ceneo_links(page = i, cat = 'cik') %>%
   read_html() %>% html_nodes('div.pagination ul') %>%
-  html_nodes('li a') %>% html_
+  html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
 
-for (i in 40:n_pages) {
+for (i in 41:n_pages) {
   cat('strona: ', i, 'z 83\n')
   ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                         cat = 'cik'))
 }
+
+ceneo_piers_df <- bind_rows(ceneo_piers)
+save(ceneo_piers, file = 'datasets/ceneo-piers.rda')
