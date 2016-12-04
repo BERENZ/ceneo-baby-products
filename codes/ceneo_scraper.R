@@ -59,8 +59,7 @@ get_main_page_results <- function(url) {
   if (ncol(prod_opin) == 2) {
     prod_no_votes <-   prod_opin[, 1] %>% as.numeric()
     prod_no_opin <-   prod_opin[, 2] %>% as.numeric()
-  }
-  else {
+  } else {
     prod_no_votes <- prod_no_opin <- prod_opin %>% as.numeric()
   }
   prod_price_min <- main_page %>% html_node('span.price') %>%
@@ -122,8 +121,7 @@ get_page_details <- function(url) {
       prod_features = NULL,
       prod_details = NULL
     )
-  }
-  else {
+  }  else {
     main_page <- url %>% read_html()
     
     prod_prices <-
@@ -225,7 +223,7 @@ n_pages <- ceneo_links(page = i, cat = 'cik') %>%
   read_html() %>% html_nodes('div.pagination ul') %>%
   html_nodes('li a') %>% html_
 
-for (i in 38:n_pages) {
+for (i in 40:n_pages) {
   cat('strona: ', i, 'z 83\n')
   ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                         cat = 'cik'))
