@@ -2,7 +2,6 @@
 
 library(rvest)
 library(dplyr)
-library(rdom)
 library(stringi)
 
 source('codes/ceneo_scrap_functions.R')
