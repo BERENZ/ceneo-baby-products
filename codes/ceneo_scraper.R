@@ -112,60 +112,75 @@ get_main_page_results <- function(url) {
 ## detailed information
 
 get_page_details <- function(url) {
-  main_page <- url %>% read_html()
   
-  prod_prices <-
-    main_page %>% html_nodes('span.price span.value') %>%
-    html_text() %>% stri_paste(collapse = ', ')
-  
-  page_details <- main_page %>% html_node('li.page-tab a') %>%
-    html_attr('href') %>%
-    stri_paste('http://www.ceneo.pl', .) %>%
-    read_html()
-  
-  tab1 <- page_details %>% html_nodes('section.full-specs th') %>%
-    html_text() %>% stri_trim_both()
-  tab2 <- page_details %>% html_nodes('section.full-specs ul') %>%
-    html_text() %>% stri_trim_both()  %>%
-    stri_replace_all(rep = ' ', regex = '\r\n') %>%
-    stri_replace_all(rep = ', ', regex = '\\s{2,}')
-  
-  if (length(tab1) != 0 | length(tab2) != 0) {
-    prod_details <- data.frame(feature = tab1,
-                               value = tab2)
-  } else
-  {
-    prod_details <- data.frame(feature = NULL,
-                               value = NULL)
+  test_session_session <- html_session(url)
+  ceneo_true <- stri_detect(test_session_session$url,
+                            fixed = 'ceneo')
+  if (!ceneo_true) {
+    prod_info <- list(
+      prod_prices = NULL,
+      prod_features = NULL,
+      prod_details = NULL
+    )
   }
-  
-  page_reviews_no <- main_page %>%
-    html_nodes('ul.wrapper li.page-tab.reviews') %>%
-    html_text() %>%
-    stri_extract_all(regex = '\\d+') %>%
-    unlist()
-  
-  if (!is.null(page_reviews_no)) {
-    prod_features <- main_page %>%
-      html_nodes('ul.wrapper li.page-tab.reviews a') %>%
+  else {
+    main_page <- url %>% read_html()
+    
+    prod_prices <-
+      main_page %>% html_nodes('span.price span.value') %>%
+      html_text() %>% stri_paste(collapse = ', ')
+    
+    page_details <- main_page %>% html_node('li.page-tab a') %>%
       html_attr('href') %>%
       stri_paste('http://www.ceneo.pl', .) %>%
-      read_html() %>%
-      html_nodes('div.features-breakdown') %>%
-      html_text() %>%
-      stri_trim_both() %>%
-      stri_replace_all(rep = '', regex = '\r\n') %>%
-      stri_replace_all(rep = ';', regex = '\\s{2,}')
+      read_html()
     
-  }  else {
-    prod_features <- character()
+    tab1 <- page_details %>% html_nodes('section.full-specs th') %>%
+      html_text() %>% stri_trim_both()
+    tab2 <- page_details %>% html_nodes('section.full-specs ul') %>%
+      html_text() %>% stri_trim_both()  %>%
+      stri_replace_all(rep = ' ', regex = '\r\n') %>%
+      stri_replace_all(rep = ', ', regex = '\\s{2,}')
+    
+    if (length(tab1) != 0 | length(tab2) != 0) {
+      prod_details <- data.frame(feature = tab1,
+                                 value = tab2)
+    } else
+    {
+      prod_details <- data.frame(feature = NULL,
+                                 value = NULL)
+    }
+    
+    page_reviews_no <- main_page %>%
+      html_nodes('ul.wrapper li.page-tab.reviews') %>%
+      html_text() %>%
+      stri_extract_all(regex = '\\d+') %>%
+      unlist()
+    
+    if (!is.null(page_reviews_no)) {
+      prod_features <- main_page %>%
+        html_nodes('ul.wrapper li.page-tab.reviews a') %>%
+        html_attr('href') %>%
+        stri_paste('http://www.ceneo.pl', .) %>%
+        read_html() %>%
+        html_nodes('div.features-breakdown') %>%
+        html_text() %>%
+        stri_trim_both() %>%
+        stri_replace_all(rep = '', regex = '\r\n') %>%
+        stri_replace_all(rep = ';', regex = '\\s{2,}')
+      
+    }  else {
+      prod_features <- character()
+    }
+    
+    prod_info <- list(
+      prod_prices = prod_prices,
+      prod_features = prod_features,
+      prod_details = prod_details
+    )
   }
   
-  prod_info <- list(
-    prod_prices = prod_prices,
-    prod_features = prod_features,
-    prod_details = prod_details
-  )
+  
   return(prod_info)
 }
 
@@ -210,7 +225,7 @@ n_pages <- ceneo_links(page = i, cat = 'cik') %>%
   read_html() %>% html_nodes('div.pagination ul') %>%
   html_nodes('li a') %>% html_
 
-for (i in 37:n_pages) {
+for (i in 38:n_pages) {
   cat('strona: ', i, 'z 83\n')
   ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                         cat = 'cik'))
