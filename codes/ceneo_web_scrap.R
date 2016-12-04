@@ -15,7 +15,7 @@ n_pages <- ceneo_links(page = 1) %>%
   html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
 
 for (i in 1:n_pages) {
-  cat('strona: ', i, 'z 961\n')
+  cat('strona: ', i, 'z ', n_pages, ' \n')
   ceneo_spacer[[i]] <- get_main_page_results(ceneo_links(page = i))
 }
 
@@ -30,7 +30,7 @@ n_pages <- ceneo_links(page = i, cat = 'karm') %>%
   html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
 
 for (i in 1:n_pages) {
-  cat('strona: ', i, 'z 476\n')
+  cat('strona: ', i, 'z ', n_pages, ' \n')
   ceneo_karmienie[[i]] <-
     get_main_page_results(ceneo_links(page = i,
                                       cat = 'karm'))
@@ -46,8 +46,8 @@ n_pages <- ceneo_links(page = i, cat = 'cik') %>%
   read_html() %>% html_nodes('div.pagination ul') %>%
   html_nodes('li a') %>% html_text() %>% as.numeric() %>% max(na.rm = T)
 
-for (i in 41:n_pages) {
-  cat('strona: ', i, 'z 83\n')
+for (i in 1:n_pages) {
+  cat('strona: ', i, 'z ', n_pages, ' \n')
   ceneo_piers[[i]] <- get_main_page_results(ceneo_links(page = i,
                                                         cat = 'cik'))
 }
