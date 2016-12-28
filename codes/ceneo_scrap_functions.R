@@ -5,30 +5,14 @@
 # http://www.ceneo.pl/Karmienie_dziecka;0191;0020-30-0-0-1.htm
 # http://www.ceneo.pl/Podroz_i_spacer_z_dzieckiem;0191;0020-30-0-0-0.htm
 
-ceneo_links <- function(cat = '', page = 1) {
-  if (cat == 'cik') {
-    base_url <-
-      paste0(
-        'http://www.ceneo.pl/Ciaza_i_karmienie_piersia;0191;0020-30-0-0-',
-        page,
-        '.htm'
-      )
-  }
-  else if (cat == 'karm') {
-    base_url <-
-      paste0('http://www.ceneo.pl/Karmienie_dziecka;0191;0020-30-0-0-',
-             page,
-             '.htm')
-  }
-  else {
-    base_url <-
-      paste0(
-        'http://www.ceneo.pl/Podroz_i_spacer_z_dzieckiem;0191;0020-30-0-0-',
-        page,
-        '.htm'
-      )
-  }
-  
+ceneo_links <- function(cat = 'cit', page = 1) {
+  base_url <- switch(
+    cat,
+    cit = paste0('http://www.ceneo.pl/Ciaza_i_karmienie_piersia;0191;0020-30-0-0-', page,'.htm'),
+    karm = paste0('http://www.ceneo.pl/Karmienie_dziecka;0191;0020-30-0-0-',page,'.htm'),
+    spac = paste0(
+      'http://www.ceneo.pl/Podroz_i_spacer_z_dzieckiem;0191;0020-30-0-0-',page, '.htm'),
+    komp = paste0('http://www.ceneo.pl/Telewizory;0020-30-0-0-',page,'.htm'))
   return(base_url)
 }
 
